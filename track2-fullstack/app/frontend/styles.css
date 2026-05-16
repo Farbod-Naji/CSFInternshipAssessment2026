@@ -36,6 +36,11 @@ main {
 .page-header { margin-bottom: 1.5rem; }
 .page-header h2 { font-size: 1.4rem; font-weight: 600; }
 
+/* Disable cursor change on table content */
+table {
+  cursor: default;
+}
+
 /* Cards */
 .card-grid {
   display: grid;
