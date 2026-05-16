@@ -49,6 +49,12 @@
     const params = new URLSearchParams(window.location.search);
     const animalId = params.get('id');
 
+    // Basic validation to ensure we have an animal ID to work with
+    if (!animalId) {
+      document.getElementById('animal-detail').innerHTML = '<p class="error">No animal ID specified.</p>';
+      throw new Error('No animal ID');
+    }
+    
     async function load() {
       const animal = await api.get(`/animals/${animalId}`);
 
