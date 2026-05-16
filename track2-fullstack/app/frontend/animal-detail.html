@@ -60,9 +60,19 @@
         <dl>
           <dt>Breed</dt>       <dd>${animal.breed ?? '—'}</dd>
           <dt>Date of Birth</dt><dd>${animal.date_of_birth ?? '—'}</dd>
-          <dt>Paddock</dt>     <dd>${animal.paddock_id ?? 'Unassigned'}</dd>
+          <dt>Paddock</dt>     <dd id="paddock-name">—</dd>
         </dl>
       `;
+
+      // If the animal has an assigned paddock, fetch its name to display
+      if (animal.paddock_id) {
+        console.log('Fetching paddock info for ID:', animal.paddock_id);
+        const paddock = await api.get(`/paddocks/${animal.paddock_id}`);
+        console.log('Paddock info:', paddock);
+        document.getElementById('paddock-name').textContent = paddock.name;
+      } else {
+        document.getElementById('paddock-name').textContent = 'Unassigned';
+      }
 
       document.getElementById('health-section').style.display = 'block';
       await loadEvents();
