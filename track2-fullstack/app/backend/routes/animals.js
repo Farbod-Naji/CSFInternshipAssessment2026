@@ -63,6 +63,13 @@ router.put('/:id', (req, res) => {
   };
 
   if (updates.paddock_id !== animal.paddock_id) {
+    // If the paddock assignment is changing, update the animal counts in the old and new paddocks
+    if (animal.paddock_id) {
+      db.prepare(
+        'UPDATE paddocks SET animal_count = animal_count - 1 WHERE id = ?'
+      ).run(animal.paddock_id);
+    }
+    // If the new paddock_id is not null, increment the count for the new paddock
     if (updates.paddock_id) {
       db.prepare(
         'UPDATE paddocks SET animal_count = animal_count + 1 WHERE id = ?'
