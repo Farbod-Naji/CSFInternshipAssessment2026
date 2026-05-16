@@ -93,7 +93,7 @@ router.delete('/:id', (req, res) => {
 
   if (animal.paddock_id) {
     db.prepare(
-      'UPDATE paddocks SET animal_count = animal_count - 1 WHERE id = ?'
+      'UPDATE paddocks SET animal_count = MAX(0, animal_count - 1) WHERE id = ?' // Ensure count doesn't go negative
     ).run(animal.paddock_id);
   }
 
