@@ -34,7 +34,7 @@ function initDb() {
       vet_name   TEXT
     );
 
-    // New table for tracking animal weights over time
+    -- New table for tracking animal weights over time
     CREATE TABLE IF NOT EXISTS weights (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       animal_id  INTEGER NOT NULL REFERENCES animals(id) ON DELETE CASCADE,
