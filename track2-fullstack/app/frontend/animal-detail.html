@@ -44,6 +44,28 @@
         <button type="submit">Log Event</button>
       </form>
     </section>
+      </form>
+    </section>
+
+    <section id="weight-section" style="display:none">
+      <h3>Weight History</h3>
+      <p id="latest-weight" class="latest-weight"></p>
+      <table>
+        <thead>
+          <tr><th>Date</th><th>Weight (kg)</th><th>Notes</th></tr>
+        </thead>
+        <tbody id="weights-body"></tbody>
+      </table>
+
+      <h4>Log Weight</h4>
+      <form id="weight-form">
+        <label>Weight (kg) <input type="number" name="weight_kg" step="0.1" min="0.1" required></label>
+        <label>Date <input type="date" name="date" required></label>
+        <label>Notes <input type="text" name="notes" placeholder="Optional"></label>
+        <button type="submit">Log Weight</button>
+      </form>
+    </section>
+    
   </main>
   <script src="app.js"></script>
   <script>
@@ -81,8 +103,11 @@
         document.getElementById('paddock-name').textContent = 'Unassigned';
       }
 
+      // Show health events and weight sections once we have the animal details
       document.getElementById('health-section').style.display = 'block';
+      document.getElementById('weight-section').style.display = 'block';
       await loadEvents();
+      await loadWeights();
     }
 
     async function loadEvents() {
@@ -100,12 +125,49 @@
         : '<tr><td colspan="4" class="empty">No events recorded.</td></tr>';
     }
 
+    // New function to load and display animal weights
+    async function loadWeights() {
+      const weights = await api.get(`/animals/${animalId}/weights`);
+      const tbody = document.getElementById('weights-body');
+      const latestEl = document.getElementById('latest-weight');
+
+      if (weights.length) {
+        const latest = weights[0];
+        //const dateStr = new Date(latest.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        const [year, month, day] = latest.date.split('-');
+        const dateStr = new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        latestEl.textContent = `Latest: ${latest.weight_kg} kg on ${dateStr}`;
+        tbody.innerHTML = weights.map(w => `
+          <tr>
+            <td>${w.date}</td>
+            <td>${w.weight_kg}</td>
+            <td>${w.notes ?? '—'}</td>
+          </tr>
+        `).join('');
+      } else {
+        latestEl.textContent = '';
+        tbody.innerHTML = '<tr><td colspan="3" class="empty">No weights recorded.</td></tr>';
+      }
+    }
+
+
     document.getElementById('event-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const data = Object.fromEntries(new FormData(e.target));
       await api.post(`/animals/${animalId}/health-events`, data);
       e.target.reset();
       await loadEvents();
+    });
+
+    // New form submission handler for adding a weight entry
+    document.getElementById('weight-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(e.target));
+      data.weight_kg = parseFloat(data.weight_kg);
+      await api.post(`/animals/${animalId}/weights`, data);
+      e.target.reset();
+      await loadWeights();
     });
 
     load();
