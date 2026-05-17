@@ -108,3 +108,65 @@ test('POST /api/animals/:id/health-events creates an event', async () => {
   assert.equal(body.event_type, 'checkup');
   assert.equal(body.animal_id, id);
 });
+
+// New tests for animal weights endpoints
+test('POST /api/animals/:id/weights creates a weight record', async () => {
+  const { body: animals } = await get('/animals?page=0&limit=1');
+  const id = animals[0].id;
+  const { status, body } = await post(`/animals/${id}/weights`, {
+    weight_kg: 45.2,
+    date: '2024-11-15',
+    notes: 'Post-shearing weigh-in',
+  });
+  assert.equal(status, 201);
+  assert.equal(body.weight_kg, 45.2);
+  assert.equal(body.animal_id, id);
+  assert.equal(body.notes, 'Post-shearing weigh-in');
+});
+
+// Additional tests for weights endpoints
+test('GET /api/animals/:id/weights returns weights ordered by date descending', async () => {
+  const { body: animals } = await get('/animals?page=0&limit=1');
+  const id = animals[0].id;
+  await post(`/animals/${id}/weights`, { weight_kg: 40.0, date: '2024-01-01' });
+  await post(`/animals/${id}/weights`, { weight_kg: 50.0, date: '2024-06-01' });
+
+  const { status, body } = await get(`/animals/${id}/weights`);
+  assert.equal(status, 200);
+  assert.ok(Array.isArray(body));
+  assert.ok(body[0].date >= body[body.length - 1].date);
+});
+
+// ----- Validation tests for weights endpoint -----
+
+  test('POST /api/animals/:id/weights returns 422 for missing weight_kg', async () => {
+    const { body: animals } = await get('/animals?page=0&limit=1');
+    const id = animals[0].id;
+    const { status } = await post(`/animals/${id}/weights`, { date: '2024-11-15' });
+    assert.equal(status, 422);
+  });
+
+  test('POST /api/animals/:id/weights returns 422 for non-positive weight_kg', async () => {
+    const { body: animals } = await get('/animals?page=0&limit=1');
+    const id = animals[0].id;
+    const { status } = await post(`/animals/${id}/weights`, { weight_kg: -5, date: '2024-11-15' });
+    assert.equal(status, 422);
+  });
+
+  test('POST /api/animals/:id/weights returns 404 for unknown animal', async () => {
+    const { status } = await post('/animals/999999/weights', { weight_kg: 45.2, date: '2024-11-15' });
+    assert.equal(status, 404);
+  });
+
+// Pagination tests for GET /api/animals
+
+test('GET /api/animals uses correct pagination offset', async () => {
+  const { body: page0 } = await get('/animals?page=0&limit=1');
+  const { body: page1 } = await get('/animals?page=1&limit=1');
+  assert.ok(page0.length === 1);
+  assert.ok(page1.length <= 1);
+  if (page1.length === 1) {
+    assert.notEqual(page0[0].id, page1[0].id);
+  }
+});
+
