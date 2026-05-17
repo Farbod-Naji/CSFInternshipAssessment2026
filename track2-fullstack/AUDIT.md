@@ -42,6 +42,9 @@ If the page is opened without an `?id=` query parameter, the page requests `/ani
 **Bug 8: Table text appears editable** (`frontend/styles.css`)  
 Table rows allow text selection and can show a text cursor. `cursor: default` and `user-select: none` would make the table feel less misleading.
 
+**Bug 9: Navigation bar is not sticky** (`frontend/styles.css`)  
+The navbar scrolls away on longer pages, removing access to navigation without scrolling back to the top. Fixed with `position: sticky; top: 0; z-index: 100`.
+
 ---
 
 ### Design Concern
@@ -58,7 +61,7 @@ The main structural concerns are the manually maintained `animal_count` value an
 
 **Fix alongside:** Bugs 4 and 6, because both are small correctness fixes with clear solutions.
 
-**Fix last:** Bug 2 and UX Bugs 7 and 8, because they are lower immediate risk.
+**Fix last:** Bug 2 and UX Bugs 7, 8, and 9, because they are lower immediate risk.
 
 **Out of scope:** Authentication, input sanitisation, and rate limiting are not covered in this pass.
 
