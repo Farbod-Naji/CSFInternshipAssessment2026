@@ -44,8 +44,6 @@
         <button type="submit">Log Event</button>
       </form>
     </section>
-      </form>
-    </section>
 
     <section id="weight-section" style="display:none">
       <h3>Weight History</h3>
@@ -95,9 +93,7 @@
 
       // If the animal has an assigned paddock, fetch its name to display
       if (animal.paddock_id) {
-        console.log('Fetching paddock info for ID:', animal.paddock_id);
         const paddock = await api.get(`/paddocks/${animal.paddock_id}`);
-        console.log('Paddock info:', paddock);
         document.getElementById('paddock-name').textContent = paddock.name;
       } else {
         document.getElementById('paddock-name').textContent = 'Unassigned';
